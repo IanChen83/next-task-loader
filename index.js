@@ -11,7 +11,7 @@ module.exports = (pluginOptions = {}) => (nextConfig = {}) => {
 
       config.module.rules.push({
         test: extension,
-        use: [options.defaultLoaders.babel, require.resolve('./loader')],
+        use: require.resolve('./loader'),
       })
 
       if (typeof nextConfig.webpack === 'function') {

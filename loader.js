@@ -1,39 +1,41 @@
 const Module = require('module')
 
-async function resolveResult(obj) {
-  // Respect the shape of obj
+// Respect the shape of obj
+async function resolveResult(loader, obj) {
   if (Array.isArray(obj)) {
-    return await Promise.all(obj.map(f => f(this)))
+    return await Promise.all(obj.map(f => f(loader)))
   } else if (typeof obj === 'object') {
     const results = []
     await Promise.all(
       Object.entries(obj).map(async ([key, func]) => {
-        results[key] = await func(this)
+        results[key] = await func(loader)
       }),
     )
     return results
   } else if (typeof obj === 'function') {
-    return await obj(this)
+    return await obj(loader)
   }
 }
 
-module.exports = async function(content) {
-  function exec(code, filename) {
-    const module = new Module(filename, this)
-    module.paths = Module._nodeModulePaths(this.context || '.')
-    module.filename = filename
-    module._compile(code, filename)
-    return module.exports
-  }
+function exec(loader, code) {
+  const filename = loader.resourcePath
 
+  const module = new Module(filename, loader)
+  module.paths = Module._nodeModulePaths(loader.context || '.')
+  module.filename = filename
+  module._compile(code, filename)
+
+  return module.exports
+}
+
+module.exports = async function(content) {
   const callback = this.async()
   let results
 
   try {
     // Execute the module and get the exported value
-    const exports = exec(content, this.resourcePath)
-
-    results = await resolveResult.bind(this)(exports)
+    const exports = exec(this, content)
+    results = await resolveResult(this, exports)
   } catch (e) {
     this.emitError(e)
   }
