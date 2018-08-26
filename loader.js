@@ -33,7 +33,7 @@ module.exports = async function(content) {
     // Execute the module and get the exported value
     const exports = exec(content, this.resourcePath)
 
-    results = await resolveResult(exports)
+    results = await resolveResult.bind(this)(exports)
   } catch (e) {
     this.emitError(e)
   }
