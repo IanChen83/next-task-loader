@@ -1,23 +1,23 @@
 {
-  "name": "next-task-runner",
+  "name": "next-task-loader",
   "version": "0.0.1",
-  "description": "A Next.js plugin to load assets with custom task runners.",
+  "description": "A Next.js plugin to load assets with custom task loader scripts.",
   "main": "index.js",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/IanChen83/next-task-runner.git"
+    "url": "git+https://github.com/IanChen83/next-task-loader.git"
   },
   "keywords": [
     "next.js",
     "webpack",
-    "task runner"
+    "task loader"
   ],
   "author": "Ian Chen",
   "license": "MIT",
   "bugs": {
-    "url": "https://github.com/IanChen83/next-task-runner/issues"
+    "url": "https://github.com/IanChen83/next-task-loader/issues"
   },
-  "homepage": "https://github.com/IanChen83/next-task-runner#readme",
+  "homepage": "https://github.com/IanChen83/next-task-loader#readme",
   "peerDependencies": {
     "next": ">=5.0.0"
   }
