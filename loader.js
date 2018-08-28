@@ -1,4 +1,5 @@
 const Module = require('module')
+const loaderUtils = require('loader-utils')
 
 // Respect the shape of obj
 async function resolveResult(loader, obj) {
@@ -17,28 +18,48 @@ async function resolveResult(loader, obj) {
   }
 }
 
-function exec(loader, code) {
-  const filename = loader.resourcePath
+function exec(code, filename, context) {
+  const m = new Module(filename)
 
-  const module = new Module(filename, loader)
-  module.paths = Module._nodeModulePaths(loader.context || '.')
-  module.filename = filename
-  module._compile(code, filename)
+  m.paths = Module._nodeModulePaths(context || '.')
+  m.filename = filename
+  m._compile(code, filename)
 
-  return module.exports
+  return m.exports
 }
 
 module.exports = async function(content) {
+  const { reload = true } = Object.assign({}, loaderUtils.getOptions(this))
+
   const callback = this.async()
   let results
 
+  const reloadStubName = `__webpack_reload_${this.resourcePath}__`
+  const reloadStr = reload
+    ? `
+if (module.hot) {
+  module.hot.dispose(function() {
+    window['${reloadStubName}'] = true
+  })
+  if (window['${reloadStubName}']) {
+    module.hot['${reloadStubName}'] = false
+    window.location.reload()
+  }
+}
+`
+    : ''
+
   try {
     // Execute the module and get the exported value
-    const exports = exec(this, content)
+    const exports = exec(content, this.resourcePath, this.context)
     results = await resolveResult(this, exports)
   } catch (e) {
+    results = {}
     this.emitError(e)
   }
 
-  return callback(null, `module.exports = ${JSON.stringify(results)}`)
+  return callback(
+    null,
+    `${reloadStr}module.exports = ${JSON.stringify(results)}`,
+  )
 }
