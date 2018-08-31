@@ -1,5 +1,5 @@
 module.exports = (pluginOptions = {}) => (nextConfig = {}) => {
-  const { extension = /\.task.js$/ } = pluginOptions
+  const { extension = /\.task.js$/, ...restOptions } = pluginOptions
 
   return Object.assign({}, nextConfig, {
     webpack(config, options) {
@@ -11,7 +11,10 @@ module.exports = (pluginOptions = {}) => (nextConfig = {}) => {
 
       config.module.rules.push({
         test: extension,
-        use: require.resolve('./loader'),
+        use: [{
+          loader: require.resolve('./loader'),
+          options: restOptions,
+        }],
       })
 
       if (typeof nextConfig.webpack === 'function') {
